@@ -308,18 +308,24 @@ def read_inventory(week_number):
 
     inventory = {}
 
-    # Current inventory mapping:
-    #
     # Week 1 Carryover = C
     # Each week advances 8 columns.
-    #
-    # We can make this dynamic after confirming
-    # the Inventory sheet structure.
-
     carryover_col = (
         2
         + ((week_number - 1) * 8)
     )
+
+    # Rows from the Google Sheet that should NOT
+    # be treated as inventory part numbers.
+    excluded_rows = {
+        "0.22",
+        ".22",
+        "PN",
+        "PART NUMBER",
+        "HOLDING COST",
+        "HOLDING COST FACTOR",
+        "INVENTORY VALUE"
+    }
 
     for row in range(len(inventory_sheet)):
 
@@ -334,10 +340,8 @@ def read_inventory(week_number):
 
         part = str(part).strip()
 
-        if part.upper() in [
-            "PN",
-            "PART NUMBER"
-        ]:
+        # Skip headers, summary rows, and .22
+        if part.upper() in excluded_rows:
             continue
 
         rollover = get_value(
@@ -351,6 +355,7 @@ def read_inventory(week_number):
         )
 
     return inventory
+
 
 
 # =========================================================
